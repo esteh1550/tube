@@ -6,14 +6,20 @@ let aiClient: GoogleGenAI | null = null;
 
 export const getGeminiClient = () => {
   if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    // Priority: 1. LocalStorage (User provided), 2. Environment Variable (Build time)
+    const apiKey = localStorage.getItem("GEMINI_API_KEY") || process.env.GEMINI_API_KEY;
+    
     if (!apiKey) {
       console.error("GEMINI_API_KEY is not set");
-      throw new Error("GEMINI_API_KEY is required");
+      throw new Error("API Key Missing");
     }
     aiClient = new GoogleGenAI({ apiKey });
   }
   return aiClient;
+};
+
+export const resetGeminiClient = () => {
+  aiClient = null;
 };
 
 export const MODELS = {

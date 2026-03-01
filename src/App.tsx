@@ -12,6 +12,7 @@ import VideoAnalyzer from './components/VideoAnalyzer';
 import LiveVoiceChat from './components/LiveVoiceChat';
 import LocationScout from './components/LocationScout';
 import HelpGuide from './components/HelpGuide';
+import Settings from './components/Settings';
 
 // --- Components ---
 
@@ -79,9 +80,15 @@ const IdeaGenerator = () => {
         }
       });
       setIdeas(response.text || "No ideas generated.");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setIdeas("Error generating ideas. Please try again.");
+      let msg = "Error generating ideas.";
+      if (error.message?.includes("API Key")) {
+        msg = "API Key Missing. Please check Settings.";
+      } else if (error.message?.includes("403")) {
+        msg = "API Key Invalid or Quota Exceeded.";
+      }
+      setIdeas(msg);
     } finally {
       setLoading(false);
     }
@@ -128,9 +135,13 @@ const ScriptWriter = () => {
         Keep it engaging and fast-paced.`,
       });
       setScript(response.text || "No script generated.");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setScript("Error generating script.");
+      let msg = "Error generating script.";
+      if (error.message?.includes("API Key")) {
+        msg = "API Key Missing. Please check Settings.";
+      }
+      setScript(msg);
     } finally {
       setLoading(false);
     }
@@ -627,6 +638,7 @@ export default function App() {
       </footer>
       
       <HelpGuide />
+      <Settings />
 
       <style>{`
         @keyframes marquee {
