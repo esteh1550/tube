@@ -1,0 +1,9 @@
+{
+  "name": "TubeBooster",
+  "description": "A brutalist, AI-powered toolkit for YouTube creators to generate ideas, scripts, thumbnails, and optimize content for monetization.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera",
+    "geolocation"
+  ]
+}
