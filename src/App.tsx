@@ -81,12 +81,14 @@ const IdeaGenerator = () => {
       });
       setIdeas(response.text || "No ideas generated.");
     } catch (error: any) {
-      console.error(error);
-      let msg = "Error generating ideas.";
+      console.error("Idea Gen Error:", error);
+      let msg = `Error: ${error.message || "Unknown error"}`;
       if (error.message?.includes("API Key")) {
         msg = "API Key Missing. Please check Settings.";
       } else if (error.message?.includes("403")) {
         msg = "API Key Invalid or Quota Exceeded.";
+      } else if (error.message?.includes("404")) {
+        msg = "Model not found. Try checking your API key permissions.";
       }
       setIdeas(msg);
     } finally {
@@ -136,8 +138,8 @@ const ScriptWriter = () => {
       });
       setScript(response.text || "No script generated.");
     } catch (error: any) {
-      console.error(error);
-      let msg = "Error generating script.";
+      console.error("Script Gen Error:", error);
+      let msg = `Error: ${error.message || "Unknown error"}`;
       if (error.message?.includes("API Key")) {
         msg = "API Key Missing. Please check Settings.";
       }

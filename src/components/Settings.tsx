@@ -8,10 +8,16 @@ export default function Settings() {
   const [isOpen, setIsOpen] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [saved, setSaved] = useState(false);
+  const [hasEnvKey, setHasEnvKey] = useState(false);
 
   useEffect(() => {
     const storedKey = localStorage.getItem("GEMINI_API_KEY");
     if (storedKey) setApiKey(storedKey);
+    // Check if env key exists (we can't read the value directly if it's masked in prod, but we can check if it's set in the client init logic conceptually, 
+    // but here we just check if the process.env var is present and not empty)
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.length > 0) {
+      setHasEnvKey(true);
+    }
   }, []);
 
   const handleSave = () => {
@@ -75,6 +81,14 @@ export default function Settings() {
                   <p className="text-xs font-mono text-gray-500 mb-2">
                     Required if the app is not deployed with environment variables.
                   </p>
+                  
+                  {hasEnvKey && (
+                    <div className="mb-2 text-xs font-mono text-green-600 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-green-600"></span>
+                      Environment Key Detected (Backup)
+                    </div>
+                  )}
+
                   <input 
                     type="password" 
                     value={apiKey}
