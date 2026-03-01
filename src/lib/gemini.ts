@@ -22,6 +22,28 @@ export const resetGeminiClient = () => {
   aiClient = null;
 };
 
+export const handleGeminiError = (error: any): string => {
+  console.error("Gemini API Error:", error);
+  const msg = error.message || error.toString();
+  
+  if (msg.includes("API Key") || msg.includes("API_KEY")) {
+    return "API Key Missing. Please check Settings.";
+  }
+  if (msg.includes("403")) {
+    return "Access Denied (403). Key invalid or restricted.";
+  }
+  if (msg.includes("404")) {
+    return "Model not found (404). Check key permissions.";
+  }
+  if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("quota")) {
+    return "Quota Exceeded (429). Please wait or use a paid key.";
+  }
+  if (msg.includes("500") || msg.includes("503")) {
+    return "Google Server Error. Please try again later.";
+  }
+  return `Error: ${msg.substring(0, 100)}...`;
+};
+
 export const MODELS = {
   FLASH: "gemini-2.5-flash-latest", 
   FLASH_LITE: "gemini-2.5-flash-lite-latest",

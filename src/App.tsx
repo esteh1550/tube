@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Type, Image as ImageIcon, Search, TrendingUp, Video, Loader2, Mic, Volume2, MessageSquare, Camera } from 'lucide-react';
-import { getGeminiClient, MODELS } from './lib/gemini';
+import { getGeminiClient, MODELS, handleGeminiError } from './lib/gemini';
 import ReactMarkdown from 'react-markdown';
 import { cn } from './lib/utils';
 import { Modality } from "@google/genai";
@@ -81,16 +81,7 @@ const IdeaGenerator = () => {
       });
       setIdeas(response.text || "No ideas generated.");
     } catch (error: any) {
-      console.error("Idea Gen Error:", error);
-      let msg = `Error: ${error.message || "Unknown error"}`;
-      if (error.message?.includes("API Key")) {
-        msg = "API Key Missing. Please check Settings.";
-      } else if (error.message?.includes("403")) {
-        msg = "API Key Invalid or Quota Exceeded.";
-      } else if (error.message?.includes("404")) {
-        msg = "Model not found. Try checking your API key permissions.";
-      }
-      setIdeas(msg);
+      setIdeas(handleGeminiError(error));
     } finally {
       setLoading(false);
     }
@@ -138,12 +129,7 @@ const ScriptWriter = () => {
       });
       setScript(response.text || "No script generated.");
     } catch (error: any) {
-      console.error("Script Gen Error:", error);
-      let msg = `Error: ${error.message || "Unknown error"}`;
-      if (error.message?.includes("API Key")) {
-        msg = "API Key Missing. Please check Settings.";
-      }
-      setScript(msg);
+      setScript(handleGeminiError(error));
     } finally {
       setLoading(false);
     }
@@ -202,7 +188,8 @@ const ThumbnailCreator = () => {
         setImageUrl(`data:${part.inlineData.mimeType};base64,${part.inlineData.data}`);
       }
     } catch (error) {
-      console.error(error);
+      console.error(handleGeminiError(error));
+      alert(handleGeminiError(error));
     } finally {
       setLoading(false);
     }
@@ -280,7 +267,8 @@ const VideoGenerator = () => {
         setVideoUrl(URL.createObjectURL(blob));
       }
     } catch (error) {
-      console.error(error);
+      console.error(handleGeminiError(error));
+      alert(handleGeminiError(error));
     } finally {
       setLoading(false);
     }
@@ -378,7 +366,7 @@ const AudioTranscriber = () => {
         setLoading(false);
       };
     } catch (error) {
-      console.error(error);
+      setTranscription(handleGeminiError(error));
       setLoading(false);
     }
   };
@@ -434,7 +422,8 @@ const TextToSpeech = () => {
         setAudioUrl(`data:audio/mp3;base64,${base64Audio}`);
       }
     } catch (error) {
-      console.error(error);
+      console.error(handleGeminiError(error));
+      alert(handleGeminiError(error));
     } finally {
       setLoading(false);
     }
@@ -491,7 +480,8 @@ const ChatBot = () => {
       const botMsg = { role: 'model', text: result.text || "No response." };
       setMessages(prev => [...prev, botMsg]);
     } catch (error) {
-      console.error(error);
+      const errorMsg = { role: 'model', text: handleGeminiError(error) };
+      setMessages(prev => [...prev, errorMsg]);
     } finally {
       setLoading(false);
     }
@@ -554,7 +544,7 @@ const ImageAnalyzer = () => {
         setLoading(false);
       };
     } catch (error) {
-      console.error(error);
+      setAnalysis(handleGeminiError(error));
       setLoading(false);
     }
   };
