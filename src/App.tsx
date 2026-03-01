@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Type, Image as ImageIcon, Search, TrendingUp, Video, Loader2, Mic, Volume2, MessageSquare, Camera } from 'lucide-react';
-import { getGeminiClient, MODELS, handleGeminiError } from './lib/gemini';
+import { getGeminiClient, MODELS, handleGeminiError, generateContentWithFallback } from './lib/gemini';
 import ReactMarkdown from 'react-markdown';
 import { cn } from './lib/utils';
 import { Modality } from "@google/genai";
@@ -69,7 +69,7 @@ const IdeaGenerator = () => {
     setLoading(true);
     try {
       const client = getGeminiClient();
-      const response = await client.models.generateContent({
+      const response = await generateContentWithFallback(client, {
         model: MODELS.SEARCH,
         contents: `Generate 5 viral YouTube video ideas about "${topic}". 
         Use Google Search to find current trends related to this topic.
@@ -121,7 +121,7 @@ const ScriptWriter = () => {
     setLoading(true);
     try {
       const client = getGeminiClient();
-      const response = await client.models.generateContent({
+      const response = await generateContentWithFallback(client, {
         model: MODELS.PRO,
         contents: `Write a YouTube video script for a video titled "${title}".
         Structure it with: Hook, Intro, 3 Key Points, CTA, Outro.
@@ -531,7 +531,7 @@ const ImageAnalyzer = () => {
       reader.onloadend = async () => {
         const base64data = (reader.result as string).split(',')[1];
         const client = getGeminiClient();
-        const response = await client.models.generateContent({
+        const response = await generateContentWithFallback(client, {
           model: MODELS.PRO,
           contents: {
             parts: [

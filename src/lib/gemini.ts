@@ -55,3 +55,41 @@ export const MODELS = {
   TTS: "gemini-2.5-flash-preview-tts",
   AUDIO_LIVE: "gemini-2.5-flash-native-audio-preview-09-2025"
 };
+
+export async function generateContentWithFallback(client: GoogleGenAI, params: any) {
+  try {
+    return await client.models.generateContent(params);
+  } catch (error: any) {
+    const msg = error.message || error.toString();
+    // Only retry on 429 (Quota) or 503 (Overloaded)
+    if (msg.includes("429") || msg.includes("503")) {
+      // Determine fallback model
+      let fallbackModel = null;
+      
+      if (params.model === MODELS.PRO) {
+        fallbackModel = MODELS.FLASH;
+      } else if (params.model === MODELS.FLASH) {
+        fallbackModel = MODELS.FLASH_LITE;
+      } else if (params.model === MODELS.SEARCH) {
+        fallbackModel = MODELS.FLASH; 
+      }
+
+      if (fallbackModel && fallbackModel !== params.model) {
+        console.warn(`Quota exceeded for ${params.model}. Retrying with fallback: ${fallbackModel}`);
+        
+        // Remove tools if falling back to a model that might not support them (though Flash supports most)
+        const newConfig = { ...params.config };
+        if (newConfig.thinkingConfig) {
+          delete newConfig.thinkingConfig; // Flash doesn't support thinking mode
+        }
+
+        return await client.models.generateContent({
+          ...params,
+          model: fallbackModel,
+          config: newConfig
+        });
+      }
+    }
+    throw error;
+  }
+}

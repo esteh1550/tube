@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getGeminiClient, MODELS } from '../lib/gemini';
+import { getGeminiClient, MODELS, generateContentWithFallback } from '../lib/gemini';
 import { Loader2, BrainCircuit } from 'lucide-react';
 import { cn } from '../lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -56,7 +56,7 @@ export default function DeepStrategy() {
     setLoading(true);
     try {
       const client = getGeminiClient();
-      const response = await client.models.generateContent({
+      const response = await generateContentWithFallback(client, {
         model: MODELS.PRO,
         contents: `Develop a comprehensive YouTube growth strategy for: "${query}".
         Include:
